@@ -1,1 +1,1 @@
-# ninja-forms-auth
+# Ninja Forms - Auth [![Build Status](https://travis-ci.org/wpninjas/ninja-forms-auth.svg?branch=develop)](https://travis-ci.org/wpninjas/ninja-forms-auth)
