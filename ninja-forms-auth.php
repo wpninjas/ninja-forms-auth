@@ -3,6 +3,7 @@
 /**
  * Plugin Name: Ninja Forms - Auth
  * Version: 3.0.0-alpha
+ * GitHub Plugin URI: https://github.com/wpninjas/ninja-forms-auth
  */
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/autoload.php';
