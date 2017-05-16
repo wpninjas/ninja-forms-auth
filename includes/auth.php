@@ -6,7 +6,7 @@ final class NF_Auth extends NF_Auth_Plugin
     {
         parent::__construct( $version, $file );
 
-        $this->endpoint = new NF_Auth_Endpoints_Example();
+        (new NF_Auth_Integrations_WPOAuthServer_Endpoints_Register())->init();
     }
 
     /*
