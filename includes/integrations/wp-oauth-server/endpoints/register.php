@@ -51,7 +51,9 @@ final class NF_Auth_Integrations_WPOAuthServer_Endpoints_Register
 
         $client_insert = $this->create_client( array(
             'secret' => $client_secret,
-            'name' => $site_url[ 'host' ]
+            'name' => $site_url[ 'host' ],
+            'user_id' => get_current_user_id(),
+            'grant_types' => array( 'client_credentials' )
         ));
 
         $client_id = get_post_meta( $client_insert, 'client_id', /* single */ true );
