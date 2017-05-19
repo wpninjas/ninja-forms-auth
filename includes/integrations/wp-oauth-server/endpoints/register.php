@@ -16,6 +16,7 @@ final class NF_Auth_Integrations_WPOAuthServer_Endpoints_Register
 
     public function add_vars( $vars )
     {
+        $vars[] = 'client_id';
         $vars[] = 'client_secret';
         $vars[] = 'client_redirect';
         return $vars;
@@ -25,12 +26,18 @@ final class NF_Auth_Integrations_WPOAuthServer_Endpoints_Register
     {
         $endpoints[ 'register' ] = array(
             'public' => true,
-            'func' => array( $this, 'callback' )
+            'func' => array( $this, 'connect' )
         );
+
+        $endpoints[ 'disconnect' ] = array(
+            'public' => true,
+            'func' => array( $this, 'disconnect' )
+        );
+
         return $endpoints;
     }
 
-    public function callback()
+    public function connect()
     {
         if ( ! is_user_logged_in() ) auth_redirect();
 
@@ -62,6 +69,51 @@ final class NF_Auth_Integrations_WPOAuthServer_Endpoints_Register
 
         wp_redirect( $client_redirect );
         exit();
+    }
+
+    /**
+     * @todo Sanatize query vars.
+     */
+    public function disconnect()
+    {
+        $client_id       = get_query_var( 'client_id' );
+        $client_secret   = get_query_var( 'client_secret' );
+
+        $args = array(
+            'post_type'  => 'wo_client',
+            'meta_key' => 'client_id',
+            'meta_value' => $client_id
+        );
+
+        $client = get_posts( $args );
+
+        if( is_array( $client ) ){
+            $client = $client[0];
+        }
+
+        if( ! $client ){
+            status_header( 404 );
+            echo json_encode( [ 'error' => 'Client not found.' ] );
+            return;
+        }
+
+        if( $client_secret != get_post_meta( $client->ID, 'client_secret', /* $single */ true ) ){
+            status_header( '403' );
+            echo json_encode( [ 'error' => 'Client Secret does not match.' ] );
+            return;
+        }
+
+        // TODO: Delete the Client.
+//        $deleted = wp_delete_post( $client->ID, /* $force_delete */ true );
+        $deleted = wp_delete_post( $client->ID, /* $force_delete */ true );
+
+        if( false === $deleted ){
+            status_header( 500 );
+            return;
+        }
+
+        echo json_encode( [ 'delete' => true ] );
+        return;
     }
 
     /**
