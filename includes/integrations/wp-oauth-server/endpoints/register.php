@@ -19,6 +19,7 @@ final class NF_Auth_Integrations_WPOAuthServer_Endpoints_Register
         $vars[] = 'client_id';
         $vars[] = 'client_secret';
         $vars[] = 'client_redirect';
+        $vars[] = 'client_site_url';
         return $vars;
     }
 
@@ -43,6 +44,7 @@ final class NF_Auth_Integrations_WPOAuthServer_Endpoints_Register
 
         $client_secret   = get_query_var( 'client_secret' ); // TODO: How should we sanatize this?
         $client_redirect = get_query_var( 'client_redirect' );
+        $client_site_url = get_query_var( 'client_site_url' );
 
         if( ! $client_secret ){
             echo json_encode( [ 'error' => 'Client Secret not found.' ] ); // TODO: Update this to match WO responses.
@@ -54,13 +56,12 @@ final class NF_Auth_Integrations_WPOAuthServer_Endpoints_Register
             return;
         }
 
-        $site_url = parse_url( $client_redirect );
-
         $client_insert = $this->create_client( array(
             'secret' => $client_secret,
-            'name' => $site_url[ 'host' ],
+            'name' => parse_url( $client_site_url, PHP_URL_HOST ),
             'user_id' => get_current_user_id(),
-            'grant_types' => array( 'client_credentials' )
+            'grant_types' => array( 'client_credentials' ),
+            'redirect_uri' => $client_site_url
         ));
 
         $client_id = get_post_meta( $client_insert, 'client_id', /* single */ true );
