@@ -76,14 +76,20 @@ final class NF_Auth_Integrations_WPOAuthServer_Endpoints_Register
      */
     public function disconnect()
     {
+        if( 'OPTIONS' == $_SERVER['REQUEST_METHOD'] ){
+            return;
+        }
+
         if( 'DELETE' != $_SERVER['REQUEST_METHOD'] ){
             status_header( 405 );
             echo json_encode( [ 'error' => 'Resource requires a DELETE request.' ] );
             return;
         }
 
-        $client_id       = get_query_var( 'client_id' );
-        $client_secret   = get_query_var( 'client_secret' );
+        parse_str( file_get_contents( 'php://input' ), $request_data );
+        $client_id     = $request_data[ 'client_id' ];
+        $client_secret = $request_data[ 'client_secret' ];
+        $debug_request = ( isset( $request_data[ 'debug' ] ) ) ? $request_data[ 'debug' ] : false;
 
         $args = array(
             'post_type'  => 'wo_client',
@@ -98,23 +104,21 @@ final class NF_Auth_Integrations_WPOAuthServer_Endpoints_Register
         }
 
         if( ! $client ){
-            status_header( 404 );
+            if( $debug_request ) status_header( 404 );
             echo json_encode( [ 'error' => 'Client not found.' ] );
             return;
         }
 
         if( $client_secret != get_post_meta( $client->ID, 'client_secret', /* $single */ true ) ){
-            status_header( '403' );
+            if( $debug_request ) status_header( '403' );
             echo json_encode( [ 'error' => 'Client Secret does not match.' ] );
             return;
         }
 
-        // TODO: Delete the Client.
-//        $deleted = wp_delete_post( $client->ID, /* $force_delete */ true );
         $deleted = wp_delete_post( $client->ID, /* $force_delete */ true );
 
         if( false === $deleted ){
-            status_header( 500 );
+            if( $debug_request ) status_header( 500 );
             return;
         }
 
