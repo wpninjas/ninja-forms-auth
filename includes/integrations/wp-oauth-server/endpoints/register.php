@@ -76,6 +76,12 @@ final class NF_Auth_Integrations_WPOAuthServer_Endpoints_Register
      */
     public function disconnect()
     {
+        if( 'DELETE' != $_SERVER['REQUEST_METHOD'] ){
+            status_header( 405 );
+            echo json_encode( [ 'error' => 'Resource requires a DELETE request.' ] );
+            return;
+        }
+
         $client_id       = get_query_var( 'client_id' );
         $client_secret   = get_query_var( 'client_secret' );
 
