@@ -6,6 +6,63 @@ final class NF_Auth extends NF_Auth_Plugin
     {
         parent::__construct( $version, $file );
 
+        add_action( 'admin_init', function(){
+            if(
+                ! isset( $_REQUEST[ 'nf_install_license' ] )
+                || ! isset( $_REQUEST[ 'nf_install_client' ] )
+            ) return;
+
+            $client_id = absint( $_REQUEST[ 'nf_install_client' ] );
+
+            $license_key = get_post_meta( $_REQUEST[ 'nf_install_license' ], '_edd_sl_key', true );
+            $download_id = get_post_meta( $_REQUEST[ 'nf_install_license' ], '_edd_sl_download_id', true );
+            $download = get_post( $download_id );
+
+            $webhook = new NF_Auth_Integrations_WPOAuthServer_Webhook();
+            $webhook->init( $client_id );
+            $webhook->send( 'install', array(
+                'download' => $download->post_title,
+                'license' => $license_key,
+                'slug' => $download->post_name
+            ), true );
+
+            echo "<pre>";
+            var_dump($webhook);
+            echo "</pre>";
+            die();
+        });
+
+        add_shortcode( 'site_manager', function(){
+            $user_id = get_current_user_id();
+            $licenses = get_edd_data( $user_id );
+
+            foreach( $licenses as &$license ){
+                $sites = maybe_unserialize( $license[ 'sites' ] );
+                $license[ 'sites' ] = array_values( $sites );
+            }
+
+            $clients = get_posts(array(
+               'post_type' => 'wo_client',
+                'meta_key' => 'user_id',
+                'meta_value' => $user_id
+            ));
+
+            $sites = array();
+            foreach( $clients as $client ){
+                $url = get_post_meta( $client->ID, 'redirect_uri', true );
+                $url = parse_url( $url, PHP_URL_HOST );
+                $sites[ $client->ID ] = trailingslashit( $url );
+            }
+
+            wp_enqueue_script( 'nf_site_manager', NF_Auth()->url( 'client/site-manager/main.js' ), array( 'jquery' ) );
+            wp_localize_script( 'nf_site_manager', 'nfSiteManager', array(
+                'sites' => $sites,
+                'licenses' => $licenses,
+            ));
+
+            return '<div id="nfSiteManager"></div>';
+        });
+
         (new NF_Auth_Integrations_WPOAuthServer_Endpoints_Register())->init();
 
         add_action( 'rest_api_init', function () {

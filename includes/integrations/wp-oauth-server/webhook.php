@@ -19,6 +19,7 @@ class NF_Auth_Integrations_WPOAuthServer_Webhook
     public function send( $name, $payload, $blocking = false )
     {
         $payload = json_encode( $payload );
+        
         return $this->response = wp_remote_post( $this->client_url, array(
             'blocking' => $blocking,
             'body' => array(
