@@ -22,6 +22,7 @@ final class NF_Auth extends NF_Auth_Plugin
             $webhook->init( $client_id );
             
             $sites = maybe_unserialize( get_post_meta( $_REQUEST[ 'nf_install_license' ], '_edd_sl_sites', true ) );
+            $sites = ( is_array( $sites ) ) ? $sites : array();
             array_push( $sites, $webhook->client_url );
             update_post_meta( $_REQUEST[ 'nf_install_license' ], '_edd_sl_sites', $sites );
             
