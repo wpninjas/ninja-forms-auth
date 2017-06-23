@@ -20,6 +20,11 @@ final class NF_Auth extends NF_Auth_Plugin
 
             $webhook = new NF_Auth_Integrations_WPOAuthServer_Webhook();
             $webhook->init( $client_id );
+            
+            $sites = maybe_unserialize( get_post_meta( $_REQUEST[ 'nf_install_license' ], '_edd_sl_sites', true ) );
+            array_push( $sites, $webhook->client_url );
+            update_post_meta( $_REQUEST[ 'nf_install_license' ], '_edd_sl_sites', serialize( $sites ) );
+            
             $webhook->send( 'install', array(
                 'download' => $download->post_title,
                 'license' => $license_key,
