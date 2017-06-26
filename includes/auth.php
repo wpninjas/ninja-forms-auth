@@ -6,6 +6,8 @@ final class NF_Auth extends NF_Auth_Plugin
     {
         parent::__construct( $version, $file );
 
+        add_shortcode( 'myNFClientBox', array( $this, 'myNFClientBox' ) );
+        
         add_action( 'admin_init', function(){
             if(
                 ! isset( $_REQUEST[ 'nf_install_license' ] )
@@ -112,6 +114,93 @@ final class NF_Auth extends NF_Auth_Plugin
             ));
             wp_enqueue_script( 'wo-client-webhook-example' );
         });
+    }
+
+    function myNFClientBox() {
+        $data = array(
+            500816 => array(
+                'id' => 500816,
+                'label' => 'Personal Membership',
+                'slug' => 'individual-membership',
+                'sites' => array(
+                  'daybreak.tv/'  
+                ),
+                'status' => 'active',
+                'parent_id' => 0
+            ),
+            500817 => array(
+                'id' => 500817,
+                'label' => 'Conditional Logic',
+                'slug' => 'conditional-logic',
+                'sites' => array(
+                  'daybreak.tv/'  
+                ),
+                'status' => 'active',
+                'parent_id' => 500816
+            ),
+            500818 => array(
+                'id' => 500818,
+                'label' => 'File Uploads',
+                'slug' => 'file-uploads',
+                'sites' => array(
+                  'daybreak.tv/'  
+                ),
+                'status' => 'active',
+                'parent_id' => 500816
+            ),
+            500819 => array(
+                'id' => 500819,
+                'label' => 'Layout and Styles',
+                'slug' => 'layout-styles',
+                'sites' => array(
+                  'daybreak.tv/'  
+                ),
+                'status' => 'active',
+                'parent_id' => 500816
+            ),
+            500820 => array(
+                'id' => 500820,
+                'label' => 'Multi-Part Forms',
+                'slug' => 'multi-part-forms',
+                'sites' => array(
+                  'daybreak.tv/'  
+                ),
+                'status' => 'active',
+                'parent_id' => 500816
+            ),
+            500826 => array(
+                'id' => 500826,
+                'label' => 'Zapier',
+                'slug' => 'zapier',
+                'sites' => array(
+                  'daybreak.tv/'  
+                ),
+                'status' => 'active',
+                'parent_id' => 0
+            ),
+        );
+        $oath = array(
+            'client_data' => array(
+                12 => array(
+                'id' => 12,
+                'url' => 'daybreak.tv/',
+                ),
+                29 => array(
+                'id' => 29,
+                'url' => 'nightfall.tv/',
+                ),
+                34 => array(
+                'id' => 34,
+                'url' => 'sunset.tv/',
+                ),
+            ),
+            'current_site' => 12,
+        );
+        wp_register_script('krmDisplayData', $this->url() . 'assets/js/site-manager.js');
+        wp_localize_script('krmDisplayData', 'eddStuff', $data);
+        wp_localize_script('krmDisplayData', 'oauthStuff', $oath);
+        wp_enqueue_script('krmDisplayData');
+        return false;
     }
 
     /*
